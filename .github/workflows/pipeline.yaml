@@ -1,0 +1,37 @@
+name: 'Build Pipeline'
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - master
+      - main
+      - support/*
+      - release/*
+
+concurrency:
+  # Only run once for latest commit per ref and cancel other (previous) runs
+  # Only run once for latest commit per ref
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # don't cancel runs on "develop", "master", "main", "support/*" and "release/*" when new changes are pushed
+  cancel-in-progress: ${{ !(contains(fromJSON('[ "refs/heads/develop", "refs/heads/master", "refs/heads/main"]'), github.ref) || startsWith(github.ref, 'refs/heads/support/') || startsWith(github.ref, 'refs/heads/release/')) }}
+
+#Define permission of jobs
+permissions: write-all
+#Definition of jobs environment variables
+env:
+  DEFAULT_JDK_VERSION: 17
+  DEFAULT_NODE_VERSION: 18.18.2
+  
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+    
+      - name: Sleep
+        run: |
+         sleep 120
